@@ -47,43 +47,57 @@ class User_m extends CI_Model {
 		return $query;
 	}
 
-
 	public function getDashboard($perpage, $start, $sort_by, $sort_dir, $query, $other) {
-		if($perpage > 100) {$perpage = 100;}
+    if ($perpage > 100) {
+        $perpage = 100;
+    }
+
+    if ($other != null && $other != '') {
+        $paramWhere = json_decode($other, true);
+        foreach ($paramWhere as $x => $x_value) {
+            if ($x_value == "" || $x_value == null) {
+                unset($paramWhere[$x]);
+            }
+        }
+        $this->db->where($paramWhere);
+    }
+
+    if ($query != '') {
+        $query = strtolower($query);
+        $this->db->group_start();
+        $this->db->like('LOWER(concat(username))', $query);
+        $this->db->group_end();
+    }
+
+    $this->db->select('user.id, username, anggaran, name, nama_personel');
+    $this->db->select('(SELECT SUM(total_hotel) FROM hotel WHERE hotel.create_by = user.id) AS total_hotel', false);
+    $this->db->select('(SELECT SUM(grand_total) FROM perincian_biaya WHERE perincian_biaya.create_by = user.id) AS grand_total', false);
+    $this->db->select('(SELECT SUM(total) FROM tiket WHERE tiket.create_by = user.id) AS total_tiket', false);
+    $this->db->select('(SELECT SUM(total_taktis) FROM dana_taktis WHERE dana_taktis.create_by = user.id) AS total_taktis', false);
+    $this->db->from('user');
+    $this->db->join('personel', 'personel.id = user.name', 'left');
+    $this->db->order_by($sort_by, $sort_dir);
+
+    $query = $this->db->get();
+    $results = $query->result_array();
+
+    // Hitung total semua kolom untuk setiap pengguna (per-user)
+    foreach ($results as &$result) {
+        $result['totalall'] = $result['total_hotel'] + $result['grand_total'] + $result['total_tiket'] + $result['total_taktis'];
+
+        // Hitung daya serap dalam persentase dan bulatkan ke 2 desimal
+        $result['daya_serap'] = round(($result['anggaran'] - $result['totalall']) / $result['anggaran'] * 100, 2);
+    }
+
+    return $results;
+}
 
 
-		if ($other != null && $other != '') {
-			$paramWhere = json_decode($other, true);
-			foreach($paramWhere as $x => $x_value) {
-				if($x_value == "" || $x_value == null) {
-					unset($paramWhere[$x]);
-				}
-			}
-
-			$this->db->where($paramWhere);
-		}
 
 
-		if ($query != '') {
-			$query = strtolower($query);
-			$this->db->group_start();
-			$this->db->like('LOWER(concat(username))', $query);
-			$this->db->group_end();
-		}
-	
 
-		$this->db->select('user.id, username, anggaran, name, nama_personel, total_hotel, grand_total, tiket.total, tiket.create_by, hotel.create_by, perincian_biaya.create_by, total_taktis');
-		$this->db->from('user');
-		$this->db->join('personel', 'personel.id = user.name', 'left');
-		$this->db->join('tiket', 'tiket.create_by = user.id', 'left');
-		$this->db->join('perincian_biaya', 'perincian_biaya.create_by = user.id', 'left');
-		$this->db->join('hotel', 'hotel.create_by = user.id', 'left');
-		$this->db->join('dana_taktis', 'dana_taktis.create_by = user.id', 'left');
 
-		$this->db->order_by($sort_by, $sort_dir);
-	
-		$query = $this->db->get();
-		return $query;
-	}
+
+
 
 }

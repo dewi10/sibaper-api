@@ -13,7 +13,7 @@ class Api_user extends Api {
 		$jsonReq = json_decode($this->input->raw_input_stream, true);
 		if($this->pagingParamCheck($jsonReq)) {
 			$this->haveAccess($jsonReq['username'], $jsonReq['password']);
-			$data = $this->User_m->getDashboard($jsonReq['limit'], $jsonReq['offset'], $jsonReq['sort_by'], $jsonReq['sort_dir'], $jsonReq['query'], $jsonReq['other'])->result_array();
+			$data = $this->User_m->getDashboard($jsonReq['limit'], $jsonReq['offset'], $jsonReq['sort_by'], $jsonReq['sort_dir'], $jsonReq['query'], $jsonReq['other']);
 			$res = array();
 			if (!empty($data)) {
 				foreach ($data as $row) {
