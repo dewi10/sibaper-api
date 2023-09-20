@@ -67,6 +67,9 @@ class Api extends CI_Controller{
 			return false;
 		}
 
+		// print_r($input);
+		// die();
+		
 		$filesize = getimagesize($temp);
 		if($filesize != null || $filesize != array()) {
 			if ($filesize[0] > 2000 || $filesize[1] > 2000) {

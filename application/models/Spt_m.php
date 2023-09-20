@@ -40,12 +40,17 @@ class Spt_m extends CI_Model {
 		if ($query != '') {
 			$query = strtolower($query);
 			$this->db->group_start(); 
-			$this->db->like('LOWER(concat(no_spt,\' \',tanggal_berangkat,\' \',tanggal_kembali,\' \',kota_asal,\' \',kota_tujuan,\' \',alat_angkut,\' \',nama_pelaksana,\' \',nama_pengikut,\' \',pejabat_ttd,\' \',beban_mak,\' \',dasar_pelaksanaan,\' \',uraian))', $query);
+			$this->db->like('LOWER(concat(no_spt,\' \',username))', $query);
 			$this->db->group_end();
 		}
 
+		$this->db->select('spt.*, username');
+		$this->db->from('spt'); 
+		$this->db->join('user', 'user.id = spt.create_by', 'left'); 
+
 		$this->db->order_by($sort_by, $sort_dir);
-		$query = $this->db->get('spt', $perpage, $start);
+
+		$query = $this->db->get(); 
 		return $query;
 	}
 

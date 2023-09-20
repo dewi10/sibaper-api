@@ -20,11 +20,9 @@ class Api_spt extends Api
 			if (!empty($data)) {
 				foreach ($data as $row) {
 					foreach ($row as $key => $value) {
-						if($key == 'metadata') {
-							$row[$key] = json_decode($row[$key]);
-						} else {
+						
 							$row[$key] = trim($row[$key]);
-						}
+						
 					}
 					$res[] = $row;
 				}
@@ -163,6 +161,10 @@ public function checkNoSpt() {
 			'dasar_pelaksanaan',
 			'mata_anggaran',
 			'no_sprin',
+			// 'komentar',
+			// 'laporan',
+			// 'rencana',
+			// 'wabku',
 			'tanggal_sprin',
 			'uraian','create_by');
 		 
@@ -228,6 +230,9 @@ public function checkNoSpt() {
  
 	//-----------------------------------------------------------------
 
+	
+	//===================================================================
+
 
 	public function updateSpt()
 	{
@@ -247,7 +252,7 @@ public function checkNoSpt() {
 			'triwulan',
 			'beban_mak',
 			'dasar_pelaksanaan',
-			'mata_anggaran',
+			'mata_anggaran', 'laporan','rencana','wabku','komentar',
 			'no_sprin',
 			'tanggal_sprin',
 			'uraian','create_by');
@@ -282,7 +287,9 @@ public function checkNoSpt() {
 		return;
 	}
 
-	//-------------------------------------------------------
+	//----------------------------------------------------------
+
+
 	public function updateSpt2()
 	{
 		if ($this->input->raw_input_stream == "") { // Jika photo tidak di input
@@ -295,7 +302,7 @@ public function checkNoSpt() {
 
 		if (isset($request['username']) && isset($request['password']) && count($request) == 4) {
 		$this->haveAccess($request['username'], $request['password']);
-		$params = array('max','uraian','pagu','realisasi','tahun');
+		$params = array('laporan','rencana','wabku');
 		
 		$formatValid = true;
 		$fileUploaded = false;
@@ -315,6 +322,18 @@ public function checkNoSpt() {
 				return;
 			}
 
+			if($data['laporan'] == "" || $data['laporan'] == null) {
+				unset($data['laporan']);
+			}
+
+			if($data['rencana'] == "" || $data['rencana'] == null) {
+				unset($data['rencana']);
+			}
+
+			if($data['wabku'] == "" || $data['wabku'] == null) {
+				unset($data['wabku']);
+			}
+
 			if (count($_FILES) != 0) {
 				$files = array_keys($_FILES);
 				foreach ($files as $file) {
@@ -329,13 +348,12 @@ public function checkNoSpt() {
 					return;
 				}
 			}
- 
 			
-			$where = array("id" => $request['id']);
+			$where = array("no_spt" => $request['no_spt']);
 			$this->Api_m->updateData($data, $where, 'spt');
 
 			$resp['status'] = "OK";
-			$resp['description'] = "Spt Updated";
+			$resp['description'] = "SPT Updated";
 		} else {
 			$resp['status'] = "NOK";
 			$resp['description'] = "Invalid Format";
