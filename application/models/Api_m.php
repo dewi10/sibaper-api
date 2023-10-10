@@ -596,55 +596,87 @@ public function insert_multiple3($data)
 
 	// format table Pic
 
-	public function insert_multiple4($data){
-		$dataFinal = array();
-		//Format Sales Name to Id
-		$formatSales = array();
-		foreach($data as $dat){
-			$salesNames = trim($dat['sales']); //'Ririn Oktarina Rahayu'
-			$tableUser = "user";
-			$this->db->where(array("name"=>$salesNames));
-			$query = $this->db->get($tableUser);
-			$result = $query->result_array();
-			foreach ($result as $val)
-			{
-				$dat['sales'] = $val['id'];
-				array_push($formatSales, $dat);
-			}
+	// public function insert_multiple4($data){
+	// 	$dataFinal = array();
+	// 	//Format Sales Name to Id
+	// 	$formatSales = array();
+	// 	foreach($data as $dat){
+	// 		$salesNames = trim($dat['sales']); //'Ririn Oktarina Rahayu'
+	// 		$tableUser = "user";
+	// 		$this->db->where(array("name"=>$salesNames));
+	// 		$query = $this->db->get($tableUser);
+	// 		$result = $query->result_array();
+	// 		foreach ($result as $val)
+	// 		{
+	// 			$dat['sales'] = $val['id'];
+	// 			array_push($formatSales, $dat);
+	// 		}
 			
-		};
-		$dataFinal = $formatSales;
-		// var_dump($dataFinal);die();
+	// 	};
+	// 	$dataFinal = $formatSales;
+	// 	// var_dump($dataFinal);die();
 
-		$formatPicType = array();
-		foreach($formatSales as $dat){
-			switch ($dat['pic_type']) {
-				case 'Office' :
-					$dat['pic_type'] = '1';
-					array_push($formatPicType, $dat);
-					break;
-				case 'Invoice' :
-					$dat['pic_type'] = '2';
-					array_push($formatPicType, $dat);
-					break;
-				case 'Site' :
-					$dat['pic_type'] = '3';
-					array_push($formatPicType, $dat);
-					break;
+	// 	$formatPicType = array();
+	// 	foreach($formatSales as $dat){
+	// 		switch ($dat['pic_type']) {
+	// 			case 'Office' :
+	// 				$dat['pic_type'] = '1';
+	// 				array_push($formatPicType, $dat);
+	// 				break;
+	// 			case 'Invoice' :
+	// 				$dat['pic_type'] = '2';
+	// 				array_push($formatPicType, $dat);
+	// 				break;
+	// 			case 'Site' :
+	// 				$dat['pic_type'] = '3';
+	// 				array_push($formatPicType, $dat);
+	// 				break;
 
-					case 'General' :
-						$dat['pic_type'] = '4';
-						array_push($formatPicType, $dat);
-						break;
-						default:
-					//what to do if the role is neither 'author' nor 'visitor'?
-			}
-		};
-		$dataFinal = $formatPicType;
-		// var_dump($dataFinal);die();
+	// 				case 'General' :
+	// 					$dat['pic_type'] = '4';
+	// 					array_push($formatPicType, $dat);
+	// 					break;
+	// 					default:
+	// 				//what to do if the role is neither 'author' nor 'visitor'?
+	// 		}
+	// 	};
+	// 	$dataFinal = $formatPicType;
+	// 	// var_dump($dataFinal);die();
 
-		$this->db->insert_batch('pic', $dataFinal);
-	}
+	// 	$this->db->insert_batch('pic', $dataFinal);
+	// }
+
+	public function insert_multiple4($data) {
+    if (!empty($data)) {
+        $existingData = $this->db->select('kode_diagnosa, nama_diagnosa, name_diagnosa')
+            ->get('diagnosa')
+            ->result_array();
+
+        $existingKeys = array();
+        foreach ($existingData as $row) {
+            $key = $row['kode_diagnosa'] . $row['nama_diagnosa'] . $row['name_diagnosa'];
+            $existingKeys[$key] = true;
+        }
+
+        $dataToInsert = array();
+        foreach ($data as $dat) {
+            $key = $dat['kode_diagnosa'] . $dat['nama_diagnosa'] . $dat['name_diagnosa'];
+
+            if (!isset($existingKeys[$key])) {
+                $dataToInsert[] = [
+                    'kode_diagnosa' => $dat['kode_diagnosa'],
+                    'nama_diagnosa' => $dat['nama_diagnosa'],
+                    'name_diagnosa' => $dat['name_diagnosa'],
+                ];
+            }
+        }
+
+        if (!empty($dataToInsert)) {
+            $this->db->insert_batch('diagnosa', $dataToInsert);
+        }
+    }
+}
+
 }
 
 ?>
