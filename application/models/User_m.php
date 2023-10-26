@@ -82,12 +82,26 @@ class User_m extends CI_Model {
     $results = $query->result_array();
 
     // Hitung total semua kolom untuk setiap pengguna (per-user)
-    foreach ($results as &$result) {
-        $result['totalall'] = $result['total_hotel'] + $result['grand_total'] + $result['total_tiket'] + $result['total_taktis'];
+		foreach ($results as &$result) {
+			$result['totalall'] = $result['total_hotel'] + $result['grand_total'] + $result['total_tiket'] + $result['total_taktis'];
+	
+			// Periksa apakah totalall adalah nol atau kosong
+			if ($result['totalall'] == 0) {
+					$result['daya_serap'] = 0;
+			} else {
+					// Hitung daya serap dalam persentase dan bulatkan ke 2 desimal
+					$result['daya_serap'] = round(($result['totalall'] / $result['anggaran']) * 100, 2);
 
-        // Hitung daya serap dalam persentase dan bulatkan ke 2 desimal
-        $result['daya_serap'] = round(($result['anggaran'] - $result['totalall']) / $result['anggaran'] * 100, 2);
-    }
+			}
+	}
+
+// 	foreach ($results as &$result) {
+// 		$result['totalall'] = $result['total_hotel'] + $result['grand_total'] + $result['total_tiket'] + $result['total_taktis'];
+
+// 		// Hitung daya serap dalam persentase dan bulatkan ke 2 desimal
+// 		$result['daya_serap'] = round(($result['anggaran'] - $result['totalall']) / $result['anggaran'] * 100, 2);
+// }
+	
 
     return $results;
 }
